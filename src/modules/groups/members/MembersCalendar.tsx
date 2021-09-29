@@ -7,7 +7,17 @@ import "tui-time-picker/dist/tui-time-picker.css";
 import { get } from "../../../utils/ajax";
 import Layout from "../../../components/layout/Layout"
 import { remoteRoutes } from "../../../data/constants";
-import { Alert } from "@material-ui/lab";
+import { signInToGoogle, initClient,getSignedInUserEmail, signOutFromGoogle , publishTheCalenderEvent } from "./GoogleCalSync"
+
+
+//import {google} from 'googleapis';
+//import {} from "gapi-script"; 
+
+
+import { Button } from '@material-ui/core';
+
+//const calendar = google.calendar('v3');
+//Client Secret: 7y_DjAKYWlLwzy6OCWmzHzxZ
 
 const start = new Date();
 const end = new Date(new Date().setMinutes(start.getMinutes() + 30));
@@ -58,12 +68,26 @@ const calendars: ICalendarInfo[] = [
   
 ];
 
+const month={
+  startDayOfWeek: 0,
+  daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+}
+
+/*const headers: IGridDateModel[] = [
+  {
+    date: "",
+    isToday: true,
+    ymd: "",
+  }
+]*/
+
 const MembersCalendar = () => {
-    const [event, setEvent] = useState<any[]>([]);
+    const [event, setEvent] = useState<any>([]);
   
-    useEffect(() => {
+      useEffect(() => {
         get (`${remoteRoutes.events}`,
         (data) => { let events: ISchedule[] = [];
+          console.log(events);
           for (let i = 0; i < data.length; i++) {
             const mce = {
               //calendarId: data[i].id,
@@ -79,27 +103,84 @@ const MembersCalendar = () => {
   
             events.push(mce);
           }
-          console.log(events);
           setEvent(events);
-          //createSchedules(event);
           },)
 },
 []);
 
+const [signedin,setSignedIn] = useState(false);
+const [googleAuthedEmail,setgoogleAuthedEmail] = useState <any | null> (null);
+
+useEffect(()=>{
+  initClient((success: any)=>{
+      if (success){
+          getGoogleAuthorizedEmail();
+          } 
+  });
+},[]);
+
+const getGoogleAuthorizedEmail =async ()=>{
+  let email = await getSignedInUserEmail();
+  if (email){
+      setSignedIn(true)
+      setgoogleAuthedEmail(email);
+      
+  }
+};
+const getAuthToGoogle =async ()=>{
+  let successfull =await signInToGoogle();
+  if (successfull){
+      getGoogleAuthorizedEmail();
+  }
+};
+
+/*const _signOutFromGoogle = () => {
+  let status = signOutFromGoogle();
+  if (status){
+      setSignedIn(false);
+      //setgoogleAuthedEmail(null);
+  }
+};*/
+
+const handleClick = (calEvent: any | "") => { 
+  getAuthToGoogle()
+  .then(() => {
+    var googleCalEvent = {}; 
+    if (calEvent !== "" ) {
+          googleCalEvent = {
+            'summary': calEvent.title,
+            'location': calEvent.location,
+            'description': calEvent.body,
+            'start':{dateTime:calEvent.start, timeZone:"America/Los_Angeles"},
+            'end': {dateTime:calEvent.end, timeZone:"America/Los_Angeles"}
+      }; //return googleCalEvent;
+      publishTheCalenderEvent(googleCalEvent);
+      console.log(googleCalEvent);
+  }
+})
+}
+  
     return (
       <Layout>
         <h1>Worship Harvest Calendar</h1>
+        <Button
+              onClick={()=>handleClick(event? event[4]:"")}
+            >
+              Add to Google Calendar
+            </Button>
+
         <TUICalendar
         useCreationPopup={true}
         useDetailPopup={true}
         height="1000px"
         view="month"
+        //template = {templates}
+        month = {month}
         calendars={calendars}
         schedules={event}
-        //raw = {event}
         />
         </Layout>
     );
 }
   
-export default MembersCalendar;
+export default MembersCalendar; 
