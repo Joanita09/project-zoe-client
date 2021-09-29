@@ -9,15 +9,7 @@ import Layout from "../../../components/layout/Layout"
 import { remoteRoutes } from "../../../data/constants";
 import { signInToGoogle, initClient,getSignedInUserEmail, signOutFromGoogle , publishTheCalenderEvent } from "./GoogleCalSync"
 
-
-//import {google} from 'googleapis';
-//import {} from "gapi-script"; 
-
-
 import { Button } from '@material-ui/core';
-
-//const calendar = google.calendar('v3');
-//Client Secret: 7y_DjAKYWlLwzy6OCWmzHzxZ
 
 const start = new Date();
 const end = new Date(new Date().setMinutes(start.getMinutes() + 30));
@@ -72,14 +64,6 @@ const month={
   startDayOfWeek: 0,
   daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
-
-/*const headers: IGridDateModel[] = [
-  {
-    date: "",
-    isToday: true,
-    ymd: "",
-  }
-]*/
 
 const MembersCalendar = () => {
     const [event, setEvent] = useState<any>([]);
@@ -151,9 +135,9 @@ const handleClick = (calEvent: any | "") => {
             'summary': calEvent.title,
             'location': calEvent.location,
             'description': calEvent.body,
-            'start':{dateTime:calEvent.start, timeZone:"America/Los_Angeles"},
-            'end': {dateTime:calEvent.end, timeZone:"America/Los_Angeles"}
-      }; //return googleCalEvent;
+            'start':{dateTime:calEvent.start},
+            'end': {dateTime:calEvent.end}
+      }; 
       publishTheCalenderEvent(googleCalEvent);
       console.log(googleCalEvent);
   }
@@ -174,7 +158,6 @@ const handleClick = (calEvent: any | "") => {
         useDetailPopup={true}
         height="1000px"
         view="month"
-        //template = {templates}
         month = {month}
         calendars={calendars}
         schedules={event}
