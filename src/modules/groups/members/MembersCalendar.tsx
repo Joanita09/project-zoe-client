@@ -148,7 +148,7 @@ const handleClick = (calEvent: any | "") => {
       <Layout>
         <h1>Worship Harvest Calendar</h1>
         <Button
-              onClick={()=>handleClick(event? event[4]:"")}
+              onClick={()=>handleClick(event? event[5]:"")}
             >
               Add to Google Calendar
             </Button>
