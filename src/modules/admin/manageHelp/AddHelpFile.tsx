@@ -28,14 +28,32 @@ const initialValues = {
   category: '',
 };
 
+function checkUrl(str: string){
+  if (str.startsWith('https')){
+    let resp = str.split('=');
+    return resp[1]
+  }
+  else if (str.startsWith('www')){
+    let resp = str.split('=');
+    return resp[1]
+  }
+  else if(str.startsWith('//')) {
+    let resp = str.split('=');
+    return resp[1]
+  }
+  return str 
+}
+
 
 const AddHelpFileButton = ({data, isNew, onCreated, onUpdated, done}: IProps) => {
 
   //Function to handle submissions
   function handleSubmit(values: any, actions: FormikHelpers<any>){
+    const editUrl = checkUrl(values.url);
+
     const toSave = {
       id: values.id,
-      url: values.url,
+      url: editUrl,
       title: values.title,
       category: values.category,
     };
